@@ -56,7 +56,7 @@ steps_median <- median(steps_per_day$steps, na.rm=TRUE)
 ## 5 2012-10-06 15420
 ## 6 2012-10-07 11015
 ```
-
+The `mean` is 1.0766189\times 10^{4} and the `median` is 1.0765\times 10^{4}.
 
 ## What is the average daily activity pattern?
 
@@ -78,9 +78,9 @@ ggplot(steps_per_interval, aes(x=interval, y=steps)) +
 ![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
 ```r
-max_interval <- steps_per_interval[which.max(steps_per_interval$steps),]
+max_interval <- steps_per_interval[which.max(steps_per_interval$steps),1]
 ```
-
+On average, 835 contains the maximum number of steps across all the days in the dataset.
 
 ## Imputing missing values
 
@@ -128,4 +128,49 @@ steps_median_fill <- median(fill_steps_per_day$steps, na.rm=TRUE)
 ##  $ interval: Factor w/ 288 levels "0","5","10","15",..: 1 2 3 4 5 6 7 8 9 10 ...
 ## [1] 0
 ```
+
+The imputed data mean is 1.0766189\times 10^{4}
+The imputed data median is 1.0766189\times 10^{4}
+
+## Are there differences in activity patterns between weekdays and weekends
+
+
+```r
+weekdays_steps <- function(data) {
+    weekdays_steps <- aggregate(data$steps, by=list(interval = data$interval),
+                          FUN=mean, na.rm=T)
+    # convert to integers for plotting
+    weekdays_steps$interval <- 
+            as.integer(levels(weekdays_steps$interval)[weekdays_steps$interval])
+    colnames(weekdays_steps) <- c("interval", "steps")
+    weekdays_steps
+}
+
+data_by_weekdays <- function(data) {
+    data$weekday <- 
+            as.factor(weekdays(data$date)) # weekdays
+    weekend_data <- subset(data, weekday %in% c("Saturday","Sunday"))
+    weekday_data <- subset(data, !weekday %in% c("Saturday","Sunday"))
+
+    weekend_steps <- weekdays_steps(weekend_data)
+    weekday_steps <- weekdays_steps(weekday_data)
+
+    weekend_steps$dayofweek <- rep("weekend", nrow(weekend_steps))
+    weekday_steps$dayofweek <- rep("weekday", nrow(weekday_steps))
+
+    data_by_weekdays <- rbind(weekend_steps, weekday_steps)
+    data_by_weekdays$dayofweek <- as.factor(data_by_weekdays$dayofweek)
+    data_by_weekdays
+}
+
+data_weekdays <- data_by_weekdays(rdata_fill)
+
+ggplot(data_weekdays, aes(x=interval, y=steps)) + 
+        geom_line(color="violet") + 
+        facet_wrap(~ dayofweek, nrow=2, ncol=1) +
+        labs(x="Interval", y="Number of steps") +
+        theme_bw()
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
