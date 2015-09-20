@@ -62,9 +62,8 @@ The `mean` is 1.0766189\times 10^{4} and the `median` is 1.0765\times 10^{4}.
 
 
 ```r
-steps_per_interval <- aggregate(rdata$steps, 
-                                by = list(interval = rdata$interval),
-                                FUN=mean, na.rm=TRUE)
+steps_per_interval <- aggregate(rdata$steps, by = list(interval = rdata$interval),FUN=mean, na.rm=TRUE)
+
 #convert to integers
 ##this helps in plotting
 steps_per_interval$interval <- 
@@ -79,8 +78,9 @@ ggplot(steps_per_interval, aes(x=interval, y=steps)) +
 
 ```r
 max_interval <- steps_per_interval[which.max(steps_per_interval$steps),1]
+max_number_steps <- steps_per_interval[max_interval,]
 ```
-On average, 835 contains the maximum number of steps across all the days in the dataset.
+On average, interval value 835 contains the maximum number of steps across all the days in the dataset which is 206.2
 
 ## Imputing missing values
 
